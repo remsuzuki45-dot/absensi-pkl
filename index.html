@@ -9,45 +9,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .sticky-col-1 { position: sticky; left: 0; z-index: 10; background-color: white; }
-        .sticky-col-2 { position: sticky; left: 48px; z-index: 10; background-color: white; }
-        .sticky-col-3 { position: sticky; left: 168px; z-index: 10; background-color: white; }
-        th.sticky-col-1, th.sticky-col-2, th.sticky-col-3 { background-color: #fef3c7; }
+        
+        /* Sticky Column Khusus Tampilan Desktop/PC agar tidak bertabrakan di HP */
+        @media (min-width: 768px) {
+            .sticky-col-1 { position: sticky; left: 0; z-index: 20; }
+            .sticky-col-2 { position: sticky; left: 48px; z-index: 20; }
+            .sticky-col-3 { position: sticky; left: 168px; z-index: 20; }
+        }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen py-8 px-4">
+<body class="bg-slate-100 text-slate-800 min-h-screen py-4 md:py-8 px-2 md:px-4">
 
-    <div class="max-w-[98%] mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-4 md:space-y-6">
         
         <!-- Header -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900 uppercase">DAFTAR HADIR SISWA PRAKTIK KERJA LAPANGAN (PKL)</h1>
-                <p class="text-base text-rose-600 font-bold mt-1">BULAN AGUSTUS 2026 (ONLINE & SINKRON)</p>
+                <h1 class="text-lg md:text-2xl font-bold text-slate-900 uppercase tracking-tight">DAFTAR HADIR SISWA PRAKTIK KERJA LAPANGAN (PKL)</h1>
+                <p class="text-sm md:text-base text-rose-600 font-bold mt-1">BULAN AGUSTUS 2026 (ONLINE & SINKRON)</p>
             </div>
-            <div class="text-center md:text-right bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
-                <div id="liveClock" class="text-xl font-bold text-indigo-600">--:--:--</div>
+            <div class="w-full md:w-auto text-center md:text-right bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
+                <div id="liveClock" class="text-lg md:text-xl font-bold text-indigo-600">--:--:--</div>
                 <div id="liveDate" class="text-xs font-medium text-slate-500">----</div>
             </div>
         </div>
 
         <!-- Form Absen Siswa -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 max-w-4xl mx-auto">
-            <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+        <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 max-w-4xl mx-auto">
+            <h2 class="text-base md:text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-user-check text-indigo-600"></i> Form Presensi Kehadiran
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Cari / Pilih Nama Siswa:</label>
-                    <select id="selectSiswa" onchange="updateSekolah()" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition bg-white">
+                    <label class="block text-xs md:text-sm font-medium text-slate-700 mb-1">Cari / Pilih Nama Siswa:</label>
+                    <select id="selectSiswa" onchange="updateSekolah()" class="w-full px-3 md:px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition bg-white">
                         <option value="">-- Pilih Nama Siswa --</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Asal Sekolah:</label>
-                    <input type="text" id="asalSekolah" placeholder="Terisi otomatis..." readonly class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium cursor-not-allowed">
+                    <label class="block text-xs md:text-sm font-medium text-slate-700 mb-1">Asal Sekolah:</label>
+                    <input type="text" id="asalSekolah" placeholder="Terisi otomatis..." readonly class="w-full px-3 md:px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-medium text-sm cursor-not-allowed">
                 </div>
             </div>
 
@@ -55,23 +58,23 @@
             <div class="space-y-3 mt-5">
                 <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Pilih Status Presensi:</label>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button onclick="catatAbsen('IN')" class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button onclick="catatAbsen('IN')" class="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-to-bracket"></i> Absen MASUK (IN)
                     </button>
-                    <button onclick="catatAbsen('OUT')" class="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                    <button onclick="catatAbsen('OUT')" class="py-3 px-4 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-right-from-bracket"></i> Absen KELUAR (OUT)
                     </button>
                 </div>
 
-                <div class="grid grid-cols-3 gap-3">
-                    <button onclick="catatAbsen('IZIN')" class="py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="catatAbsen('IZIN')" class="py-2.5 px-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-semibold text-xs md:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1">
                         <i class="fa-solid fa-envelope"></i> Izin
                     </button>
-                    <button onclick="catatAbsen('SAKIT')" class="py-2 px-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                    <button onclick="catatAbsen('SAKIT')" class="py-2.5 px-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-semibold text-xs md:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1">
                         <i class="fa-solid fa-notes-medical"></i> Sakit
                     </button>
-                    <button onclick="catatAbsen('DISPEN')" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+                    <button onclick="catatAbsen('DISPEN')" class="py-2.5 px-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs md:text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1">
                         <i class="fa-solid fa-briefcase"></i> Dispen
                     </button>
                 </div>
@@ -80,23 +83,24 @@
 
         <!-- Tabel Rekapitulasi -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <div class="p-4 md:p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-800">Matriks Rekapitulasi Presensi Agustus 2026</h2>
-                    <p class="text-xs text-slate-500" id="loadingStatus">Memuat data dari Google Sheets...</p>
+                    <h2 class="text-base md:text-lg font-semibold text-slate-800">Matriks Rekapitulasi Presensi Agustus 2026</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="loadingStatus">Memuat data dari Google Sheets...</p>
                 </div>
-                <button onclick="muatDataOnline()" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold text-sm rounded-xl transition flex items-center gap-2">
+                <button onclick="muatDataOnline()" class="w-full sm:w-auto justify-center px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold text-xs md:text-sm rounded-xl transition flex items-center gap-2">
                     <i class="fa-solid fa-rotate"></i> Refresh Data
                 </button>
             </div>
 
-            <div class="overflow-x-auto max-h-[600px]">
+            <!-- Wrapper Scroll Tabel -->
+            <div class="overflow-x-auto max-h-[600px] w-full">
                 <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
-                        <tr id="rowHeaderTanggal" class="bg-amber-100/80 text-slate-800 font-bold border-b border-slate-300 text-center">
-                            <th class="py-3 px-3 border-r border-slate-300 w-12 sticky-col-1" rowspan="2">NO</th>
-                            <th class="py-3 px-4 border-r border-slate-300 text-left min-w-[120px] sticky-col-2" rowspan="2">NAMA</th>
-                            <th class="py-3 px-4 border-r border-slate-300 text-left min-w-[120px] sticky-col-3" rowspan="2">ASAL SEKOLAH</th>
+                        <tr id="rowHeaderTanggal" class="bg-amber-100 text-slate-800 font-bold border-b border-slate-300 text-center">
+                            <th class="py-3 px-2 border-r border-slate-300 w-10 bg-amber-100 sticky-col-1" rowspan="2">NO</th>
+                            <th class="py-3 px-3 border-r border-slate-300 text-left min-w-[120px] bg-amber-100 sticky-col-2" rowspan="2">NAMA</th>
+                            <th class="py-3 px-3 border-r border-slate-300 text-left min-w-[110px] bg-amber-100 sticky-col-3" rowspan="2">ASAL SEKOLAH</th>
                         </tr>
                         <tr id="rowHeaderInOut" class="bg-slate-100 text-slate-700 font-semibold text-center border-b border-slate-300">
                         </tr>
@@ -110,11 +114,7 @@
     </div>
 
     <script>
-        // =========================================================================
-        // PASTE URL GOOGLE APPS SCRIPT KAMU DI DALAM TANDA PETIK DI BAVVAH INI:
-        // =========================================================================
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVkmA3Ab_PELF36gNbF6OzS5jg7K8hvhtlD1PPQVseJey_2CXmERLHfrKGMHKusVou5g/exec";
-        // =========================================================================
 
         const masterSiswa = [
             { no: 1, nama: "Aqil", sekolah: "Smk 11" },
@@ -171,17 +171,17 @@
 
             daftarTanggal.forEach(tgl => {
                 const thTgl = document.createElement('th');
-                thTgl.className = "py-2 px-2 border-r border-b border-slate-300 min-w-[120px]";
+                thTgl.className = "py-2 px-2 border-r border-b border-slate-300 min-w-[100px]";
                 thTgl.colSpan = 2;
                 thTgl.textContent = tgl;
                 rowHeaderTanggal.appendChild(thTgl);
 
                 const thIn = document.createElement('th');
-                thIn.className = "py-1.5 px-2 border-r border-slate-300 bg-emerald-100/60 text-emerald-800 w-14";
+                thIn.className = "py-1.5 px-2 border-r border-slate-300 bg-emerald-100/60 text-emerald-800 w-12";
                 thIn.textContent = "IN";
 
                 const thOut = document.createElement('th');
-                thOut.className = "py-1.5 px-2 border-r border-slate-300 bg-rose-100/60 text-rose-800 w-14";
+                thOut.className = "py-1.5 px-2 border-r border-slate-300 bg-rose-100/60 text-rose-800 w-12";
                 thOut.textContent = "OUT";
 
                 rowHeaderInOut.appendChild(thIn);
@@ -216,7 +216,6 @@
             return `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
         }
 
-        // FUNGSI AMBIL DATA DARI GOOGLE SHEETS
         async function muatDataOnline() {
             document.getElementById('loadingStatus').innerText = "Mengambil data terbaru...";
             try {
@@ -224,7 +223,6 @@
                 const data = await response.json();
                 
                 databaseAbsensi = {};
-                // Format Data Sheets: [No, Nama, Sekolah, Tanggal, Jam, Status]
                 data.forEach(row => {
                     const [no, nama, sekolah, tanggal, jam, status] = row;
                     if (!databaseAbsensi[no]) databaseAbsensi[no] = {};
@@ -245,16 +243,10 @@
             }
         }
 
-        // FUNGSI KIRIM DATA KE GOOGLE SHEETS
         async function catatAbsen(status) {
             const idSelected = document.getElementById('selectSiswa').value;
             if (!idSelected) {
                 alert('Silakan pilih nama siswa terlebih dahulu!');
-                return;
-            }
-
-            if (GOOGLE_SCRIPT_URL === "TEMPEL_URL_GOOGLE_APPS_SCRIPT_DI_SINI") {
-                alert("Harap masukkan URL Google Apps Script Anda terlebih dahulu di dalam kode!");
                 return;
             }
 
@@ -282,7 +274,7 @@
                 document.getElementById('selectSiswa').value = '';
                 document.getElementById('asalSekolah').value = '';
                 alert(`Berhasil! Presensi [${status}] terkirim untuk ${siswa.nama}`);
-                muatDataOnline(); // Refresh tabel setelah kirim
+                muatDataOnline();
             } catch (err) {
                 alert("Gagal menyimpan data ke server. Periksa koneksi internet.");
             }
@@ -297,9 +289,9 @@
                 tr.className = "hover:bg-slate-50 transition border-b border-slate-200";
 
                 let rowHtml = `
-                    <td class="py-2.5 px-3 text-center border-r border-slate-200 font-semibold text-slate-500 sticky-col-1">${siswa.no}</td>
-                    <td class="py-2.5 px-4 font-semibold text-slate-900 border-r border-slate-200 sticky-col-2">${siswa.nama}</td>
-                    <td class="py-2.5 px-4 text-slate-600 border-r border-slate-200 sticky-col-3">${siswa.sekolah}</td>
+                    <td class="py-2 px-2 text-center border-r border-slate-200 font-semibold text-slate-500 bg-white sticky-col-1">${siswa.no}</td>
+                    <td class="py-2 px-3 font-semibold text-slate-900 border-r border-slate-200 bg-white sticky-col-2">${siswa.nama}</td>
+                    <td class="py-2 px-3 text-slate-600 border-r border-slate-200 bg-white sticky-col-3">${siswa.sekolah}</td>
                 `;
 
                 daftarTanggal.forEach(tgl => {
@@ -312,14 +304,14 @@
                         if (record.in === 'SAKIT') colorStyle = 'bg-orange-100 text-orange-800 font-bold';
                         if (record.in === 'DISPEN') colorStyle = 'bg-blue-100 text-blue-800 font-bold';
 
-                        rowHtml += `<td colspan="2" class="py-2.5 px-2 text-center border-r border-slate-200 ${colorStyle}">${record.in}</td>`;
+                        rowHtml += `<td colspan="2" class="py-2 px-2 text-center border-r border-slate-200 ${colorStyle}">${record.in}</td>`;
                     } else {
                         let inClass = record.in !== '-' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-400';
                         let outClass = record.out !== '-' ? 'text-rose-700 font-bold bg-rose-50' : 'text-slate-400';
 
                         rowHtml += `
-                            <td class="py-2.5 px-2 text-center border-r border-slate-200 ${inClass}">${record.in}</td>
-                            <td class="py-2.5 px-2 text-center border-r border-slate-200 ${outClass}">${record.out}</td>
+                            <td class="py-2 px-2 text-center border-r border-slate-200 ${inClass}">${record.in}</td>
+                            <td class="py-2 px-2 text-center border-r border-slate-200 ${outClass}">${record.out}</td>
                         `;
                     }
                 });
