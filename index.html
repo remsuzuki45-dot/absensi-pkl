@@ -25,7 +25,7 @@
         <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-lg md:text-2xl font-bold text-slate-900 uppercase tracking-tight">DAFTAR HADIR SISWA PRAKTIK KERJA LAPANGAN (PKL)</h1>
-                <p class="text-sm md:text-base text-rose-600 font-bold mt-1">BULAN AGUSTUS 2026 (ONLINE & SINKRON)</p>
+                <p class="text-sm md:text-base text-rose-600 font-bold mt-1">REKAPITULASI ABSENSI ONLINE</p>
             </div>
             <div class="w-full md:w-auto text-center md:text-right bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
                 <div id="liveClock" class="text-lg md:text-xl font-bold text-indigo-600">--:--:--</div>
@@ -84,7 +84,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="p-4 md:p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-base md:text-lg font-semibold text-slate-800">Matriks Rekapitulasi Presensi Agustus 2026</h2>
+                    <h2 class="text-base md:text-lg font-semibold text-slate-800">Matriks Rekapitulasi Presensi</h2>
                     <p class="text-xs text-slate-500 mt-0.5" id="loadingStatus">Memuat data dari Google Sheets...</p>
                 </div>
                 <button onclick="muatDataOnline()" class="w-full sm:w-auto justify-center px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold text-xs md:text-sm rounded-xl transition flex items-center gap-2">
@@ -92,7 +92,6 @@
                 </button>
             </div>
 
-            <!-- Wrapper Scroll Tabel -->
             <div class="overflow-x-auto max-h-[600px] w-full">
                 <table class="w-full text-left border-collapse text-xs whitespace-nowrap">
                     <thead>
@@ -113,7 +112,7 @@
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVkmA3Ab_PELF36gNbF6OzS5jg7K8hvhtlD1PPQVseJey_2CXmERLHfrKGMHKusVou5g/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoeW9mbpPKWM3ZXJhfCmenSSBw8bezOqjQHuIHaNy2jkhzPygeexE4yP2KKonF2Ix75w/exec";
 
         const masterSiswa = [
             { no: 1, nama: "Aqil", sekolah: "Smk 11" },
@@ -151,18 +150,7 @@
             { no: 33, nama: "Difta", sekolah: "SMK Al-Husna" }
         ];
 
-        function generateDaftarTanggalAgustus() {
-            const listTanggal = [];
-            for (let day = 1; day <= 31; day++) {
-                const date = new Date(2026, 7, day);
-                if (date.getDay() !== 0) { 
-                    listTanggal.push(`${String(day).padStart(2, '0')}/08/2026`);
-                }
-            }
-            return listTanggal;
-        }
-
-        const daftarTanggal = generateDaftarTanggalAgustus();
+        let daftarTanggal = [];
         let rawDataOnline = [];
 
         function updateClock() {
@@ -172,30 +160,6 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
-
-        function buildTableHeader() {
-            const rowHeaderTanggal = document.getElementById('rowHeaderTanggal');
-            const rowHeaderInOut = document.getElementById('rowHeaderInOut');
-
-            daftarTanggal.forEach(tgl => {
-                const thTgl = document.createElement('th');
-                thTgl.className = "py-2 px-2 border-r border-b border-slate-300 min-w-[100px]";
-                thTgl.colSpan = 2;
-                thTgl.textContent = tgl;
-                rowHeaderTanggal.appendChild(thTgl);
-
-                const thIn = document.createElement('th');
-                thIn.className = "py-1.5 px-2 border-r border-slate-300 bg-emerald-100/60 text-emerald-800 w-12";
-                thIn.textContent = "IN";
-
-                const thOut = document.createElement('th');
-                thOut.className = "py-1.5 px-2 border-r border-slate-300 bg-rose-100/60 text-rose-800 w-12";
-                thOut.textContent = "OUT";
-
-                rowHeaderInOut.appendChild(thIn);
-                rowHeaderInOut.appendChild(thOut);
-            });
-        }
 
         function initDropdown() {
             const select = document.getElementById('selectSiswa');
@@ -219,45 +183,25 @@
             }
         }
 
-        function getTglHariIniFormat() {
-            const now = new Date();
-            const tgl = String(now.getDate()).padStart(2, '0');
-            const bln = String(now.getMonth() + 1).padStart(2, '0');
-            const thn = now.getFullYear();
-            return `${tgl}/${bln}/${thn}`;
-        }
-
-        // KONVERSI SEMUA JENIS TANGGAL TERMASUK FORMAT ISO GOOGLE SHEETS
-        function formatTanggalStandard(tglVal) {
-            if (!tglVal) return '';
+        function extractDateString(val) {
+            if (!val) return '';
+            let s = String(val).trim();
+            if (s.includes('T')) s = s.split('T')[0]; // Format ISO
             
-            // Handle jika berupa ISO String Date dari Google Sheets
-            let d = new Date(tglVal);
-            if (!isNaN(d.getTime())) {
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                return `${day}/${month}/${year}`;
-            }
-
-            // Fallback jika string biasa
-            let s = String(tglVal).trim();
-            if (s.includes('T')) s = s.split('T')[0];
-            const parts = s.split(/[\/\-\.]/);
-            if (parts.length === 3) {
+            // Mengubah YYYY-MM-DD ke DD/MM/YYYY
+            if (s.includes('-')) {
+                const parts = s.split('-');
                 if (parts[0].length === 4) {
                     return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
                 }
-                return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
             }
             return s;
         }
 
-        function formatJamStandard(jamVal) {
-            if (!jamVal && jamVal !== 0) return '-';
-            let str = String(jamVal).trim();
-            if (str.includes('.')) str = str.replace('.', ':');
-            return str;
+        function formatJam(val) {
+            if (!val && val !== 0) return '-';
+            let str = String(val).trim();
+            return str.replace('.', ':');
         }
 
         async function muatDataOnline() {
@@ -265,11 +209,62 @@
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 rawDataOnline = await response.json();
+                
+                // Kumpulkan semua tanggal yang ADA di data Google Sheets secara otomatis
+                const tglSet = new Set();
+                rawDataOnline.forEach(row => {
+                    const tglClean = extractDateString(row[3]);
+                    if (tglClean) tglSet.add(tglClean);
+                });
+
+                // Jika data kosong, buat default tanggal hari ini
+                if (tglSet.size === 0) {
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const yyyy = today.getFullYear();
+                    tglSet.add(`${dd}/${mm}/${yyyy}`);
+                }
+
+                daftarTanggal = Array.from(tglSet).sort();
+
+                buildTableHeader();
                 renderTabel();
                 document.getElementById('loadingStatus').innerText = "Data ter-update otomatis (Google Sheets)";
             } catch (err) {
                 document.getElementById('loadingStatus').innerText = "Gagal memuat data / Periksa URL Apps Script";
             }
+        }
+
+        function buildTableHeader() {
+            const rowHeaderTanggal = document.getElementById('rowHeaderTanggal');
+            const rowHeaderInOut = document.getElementById('rowHeaderInOut');
+
+            rowHeaderTanggal.innerHTML = `
+                <th class="py-3 px-2 border-r border-slate-300 w-10 bg-amber-100 sticky-col-1" rowspan="2">NO</th>
+                <th class="py-3 px-3 border-r border-slate-300 text-left min-w-[120px] bg-amber-100 sticky-col-2" rowspan="2">NAMA</th>
+                <th class="py-3 px-3 border-r border-slate-300 text-left min-w-[110px] bg-amber-100 sticky-col-3" rowspan="2">ASAL SEKOLAH</th>
+            `;
+            rowHeaderInOut.innerHTML = '';
+
+            daftarTanggal.forEach(tgl => {
+                const thTgl = document.createElement('th');
+                thTgl.className = "py-2 px-2 border-r border-b border-slate-300 min-w-[100px]";
+                thTgl.colSpan = 2;
+                thTgl.textContent = tgl;
+                rowHeaderTanggal.appendChild(thTgl);
+
+                const thIn = document.createElement('th');
+                thIn.className = "py-1.5 px-2 border-r border-slate-300 bg-emerald-100/60 text-emerald-800 w-12";
+                thIn.textContent = "IN";
+
+                const thOut = document.createElement('th');
+                thOut.className = "py-1.5 px-2 border-r border-slate-300 bg-rose-100/60 text-rose-800 w-12";
+                thOut.textContent = "OUT";
+
+                rowHeaderInOut.appendChild(thIn);
+                rowHeaderInOut.appendChild(thOut);
+            });
         }
 
         async function catatAbsen(status) {
@@ -279,9 +274,10 @@
                 return;
             }
 
-            const tglHariIni = getTglHariIniFormat();
+            const now = new Date();
+            const tglHariIni = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
             const siswa = masterSiswa.find(s => s.no == idSelected);
-            const jam = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
 
             document.getElementById('loadingStatus').innerText = "Mengirim data ke server...";
 
@@ -323,21 +319,25 @@
                     <td class="py-2 px-3 text-slate-600 border-r border-slate-200 bg-white sticky-col-3">${siswa.sekolah}</td>
                 `;
 
-                // Filter data untuk siswa berdasarkan NO
-                const rowsSiswa = rawDataOnline.filter(row => String(row[0]) === String(siswa.no));
+                // Filter baris siswa berdasarkan NO atau NAMA
+                const rowsSiswa = rawDataOnline.filter(row => {
+                    const noRow = String(row[0]).trim();
+                    const namaRow = String(row[1]).trim().toLowerCase();
+                    return noRow === String(siswa.no) || namaRow === siswa.nama.toLowerCase();
+                });
 
                 daftarTanggal.forEach(tgl => {
                     let inVal = '-';
                     let outVal = '-';
 
                     rowsSiswa.forEach(row => {
-                        const rowTgl = formatTanggalStandard(row[3]);
+                        const rowTgl = extractDateString(row[3]);
                         if (rowTgl === tgl) {
-                            const jamFormatted = formatJamStandard(row[4]);
+                            const jamClean = formatJam(row[4]);
                             const st = String(row[5]).toUpperCase().trim();
 
-                            if (st === 'IN') inVal = jamFormatted;
-                            else if (st === 'OUT') outVal = jamFormatted;
+                            if (st === 'IN') inVal = jamClean;
+                            else if (st === 'OUT') outVal = jamClean;
                             else if (['IZIN', 'SAKIT', 'DISPEN'].includes(st)) {
                                 inVal = st;
                                 outVal = st;
@@ -367,7 +367,6 @@
             });
         }
 
-        buildTableHeader();
         initDropdown();
         muatDataOnline();
     </script>
