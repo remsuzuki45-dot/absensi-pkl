@@ -113,7 +113,7 @@
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlojgysr0BRzAUR6Vc8jKqcRs8OczpE9YXLVOq4yPNO6ig9JbEjwWjaxzmzJHWZ2xvfg/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVkmA3Ab_PELF36gNbF6OzS5jg7K8hvhtlD1PPQVseJey_2CXmERLHfrKGMHKusVou5g/exec";
 
         const masterSiswa = [
             { no: 1, nama: "Aqil", sekolah: "Smk 11" },
@@ -227,9 +227,21 @@
             return `${tgl}/${bln}/${thn}`;
         }
 
-        function formatTanggalStandard(tglStr) {
-            if (!tglStr) return '';
-            let s = String(tglStr).trim();
+        // KONVERSI SEMUA JENIS TANGGAL TERMASUK FORMAT ISO GOOGLE SHEETS
+        function formatTanggalStandard(tglVal) {
+            if (!tglVal) return '';
+            
+            // Handle jika berupa ISO String Date dari Google Sheets
+            let d = new Date(tglVal);
+            if (!isNaN(d.getTime())) {
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            // Fallback jika string biasa
+            let s = String(tglVal).trim();
             if (s.includes('T')) s = s.split('T')[0];
             const parts = s.split(/[\/\-\.]/);
             if (parts.length === 3) {
@@ -239,6 +251,13 @@
                 return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
             }
             return s;
+        }
+
+        function formatJamStandard(jamVal) {
+            if (!jamVal && jamVal !== 0) return '-';
+            let str = String(jamVal).trim();
+            if (str.includes('.')) str = str.replace('.', ':');
+            return str;
         }
 
         async function muatDataOnline() {
@@ -304,11 +323,8 @@
                     <td class="py-2 px-3 text-slate-600 border-r border-slate-200 bg-white sticky-col-3">${siswa.sekolah}</td>
                 `;
 
-                const rowsSiswa = rawDataOnline.filter(row => {
-                    const noRow = String(row[0]).trim();
-                    const namaRow = String(row[1]).trim().toLowerCase();
-                    return noRow === String(siswa.no) || namaRow.includes(siswa.nama.toLowerCase());
-                });
+                // Filter data untuk siswa berdasarkan NO
+                const rowsSiswa = rawDataOnline.filter(row => String(row[0]) === String(siswa.no));
 
                 daftarTanggal.forEach(tgl => {
                     let inVal = '-';
@@ -317,11 +333,11 @@
                     rowsSiswa.forEach(row => {
                         const rowTgl = formatTanggalStandard(row[3]);
                         if (rowTgl === tgl) {
-                            const jam = row[4];
+                            const jamFormatted = formatJamStandard(row[4]);
                             const st = String(row[5]).toUpperCase().trim();
 
-                            if (st === 'IN') inVal = jam;
-                            else if (st === 'OUT') outVal = jam;
+                            if (st === 'IN') inVal = jamFormatted;
+                            else if (st === 'OUT') outVal = jamFormatted;
                             else if (['IZIN', 'SAKIT', 'DISPEN'].includes(st)) {
                                 inVal = st;
                                 outVal = st;
