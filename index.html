@@ -143,7 +143,12 @@
             { no: 25, nama: "Alfisyahrin Baarigh", sekolah: "SMKS Bina Insani" },
             { no: 26, nama: "Wilyansyah", sekolah: "SMKS Bina Insani" },
             { no: 27, nama: "Andri", sekolah: "SMKS Bina Insani" },
-            { no: 28, nama: "Rayhan", sekolah: "SMKS Bina Insani" }
+            { no: 28, nama: "Rayhan", sekolah: "SMKS Bina Insani" },
+            { no: 29, nama: "Dika", sekolah: "SMK Al-Husna" },
+            { no: 30, nama: "Fahri", sekolah: "SMK Al-Husna" },
+            { no: 31, nama: "Syabiru", sekolah: "SMK Al-Husna" },
+            { no: 32, nama: "Hafiz", sekolah: "SMK Al-Husna" },
+            { no: 33, nama: "Difta", sekolah: "SMK Al-Husna" }
         ];
 
         function generateDaftarTanggalAgustus() {
@@ -158,7 +163,7 @@
         }
 
         const daftarTanggal = generateDaftarTanggalAgustus();
-        let databaseAbsensi = {};
+        let rawDataOnline = [];
 
         function updateClock() {
             const now = new Date();
@@ -214,7 +219,6 @@
             }
         }
 
-        // PERBAIKAN FORMAT TANGGAL DI SINI (DITAMBAHKAN padStart AGAR ADA ANGKA NOL)
         function getTglHariIniFormat() {
             const now = new Date();
             const tgl = String(now.getDate()).padStart(2, '0');
@@ -223,40 +227,29 @@
             return `${tgl}/${bln}/${thn}`;
         }
 
+        function formatTanggalStandard(tglStr) {
+            if (!tglStr) return '';
+            let s = String(tglStr).trim();
+            if (s.includes('T')) s = s.split('T')[0];
+            const parts = s.split(/[\/\-\.]/);
+            if (parts.length === 3) {
+                if (parts[0].length === 4) {
+                    return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
+                }
+                return `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+            }
+            return s;
+        }
+
         async function muatDataOnline() {
-            document.getElementById('loadingStatus').innerText = "Mengambil data terbaru...";
+            document.getElementById('loadingStatus').innerText = "Mengambil data terbaru dari Google Sheets...";
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
-                const data = await response.json();
-                
-                databaseAbsensi = {};
-                data.forEach(row => {
-                    const [no, nama, sekolah, tanggal, jam, status] = row;
-                    
-                    // NORMALISASI TANGGAL: Mengubah format '5/8/2026' atau '05/8/2026' menjadi '05/08/2026'
-                    let tglFormatted = tanggal;
-                    if (tanggal && typeof tanggal === 'string' && tanggal.includes('/')) {
-                        const parts = tanggal.split('/');
-                        if (parts.length === 3) {
-                            tglFormatted = `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
-                        }
-                    }
-
-                    if (!databaseAbsensi[no]) databaseAbsensi[no] = {};
-                    if (!databaseAbsensi[no][tglFormatted]) databaseAbsensi[no][tglFormatted] = { in: '-', out: '-' };
-
-                    if (status === 'IN') databaseAbsensi[no][tglFormatted].in = jam;
-                    else if (status === 'OUT') databaseAbsensi[no][tglFormatted].out = jam;
-                    else {
-                        databaseAbsensi[no][tglFormatted].in = status;
-                        databaseAbsensi[no][tglFormatted].out = status;
-                    }
-                });
-
+                rawDataOnline = await response.json();
                 renderTabel();
                 document.getElementById('loadingStatus').innerText = "Data ter-update otomatis (Google Sheets)";
             } catch (err) {
-                document.getElementById('loadingStatus').innerText = "Gagal memuat data / Belum set URL Google Script";
+                document.getElementById('loadingStatus').innerText = "Gagal memuat data / Periksa URL Apps Script";
             }
         }
 
@@ -311,24 +304,44 @@
                     <td class="py-2 px-3 text-slate-600 border-r border-slate-200 bg-white sticky-col-3">${siswa.sekolah}</td>
                 `;
 
+                const rowsSiswa = rawDataOnline.filter(row => {
+                    const noRow = String(row[0]).trim();
+                    const namaRow = String(row[1]).trim().toLowerCase();
+                    return noRow === String(siswa.no) || namaRow.includes(siswa.nama.toLowerCase());
+                });
+
                 daftarTanggal.forEach(tgl => {
-                    const record = (databaseAbsensi[siswa.no] && databaseAbsensi[siswa.no][tgl]) 
-                        ? databaseAbsensi[siswa.no][tgl] 
-                        : { in: '-', out: '-' };
+                    let inVal = '-';
+                    let outVal = '-';
 
-                    if (['IZIN', 'SAKIT', 'DISPEN'].includes(record.in)) {
+                    rowsSiswa.forEach(row => {
+                        const rowTgl = formatTanggalStandard(row[3]);
+                        if (rowTgl === tgl) {
+                            const jam = row[4];
+                            const st = String(row[5]).toUpperCase().trim();
+
+                            if (st === 'IN') inVal = jam;
+                            else if (st === 'OUT') outVal = jam;
+                            else if (['IZIN', 'SAKIT', 'DISPEN'].includes(st)) {
+                                inVal = st;
+                                outVal = st;
+                            }
+                        }
+                    });
+
+                    if (['IZIN', 'SAKIT', 'DISPEN'].includes(inVal)) {
                         let colorStyle = 'bg-amber-100 text-amber-800 font-bold';
-                        if (record.in === 'SAKIT') colorStyle = 'bg-orange-100 text-orange-800 font-bold';
-                        if (record.in === 'DISPEN') colorStyle = 'bg-blue-100 text-blue-800 font-bold';
+                        if (inVal === 'SAKIT') colorStyle = 'bg-orange-100 text-orange-800 font-bold';
+                        if (inVal === 'DISPEN') colorStyle = 'bg-blue-100 text-blue-800 font-bold';
 
-                        rowHtml += `<td colspan="2" class="py-2 px-2 text-center border-r border-slate-200 ${colorStyle}">${record.in}</td>`;
+                        rowHtml += `<td colspan="2" class="py-2 px-2 text-center border-r border-slate-200 ${colorStyle}">${inVal}</td>`;
                     } else {
-                        let inClass = record.in !== '-' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-400';
-                        let outClass = record.out !== '-' ? 'text-rose-700 font-bold bg-rose-50' : 'text-slate-400';
+                        let inClass = inVal !== '-' ? 'text-emerald-700 font-bold bg-emerald-50' : 'text-slate-400';
+                        let outClass = outVal !== '-' ? 'text-rose-700 font-bold bg-rose-50' : 'text-slate-400';
 
                         rowHtml += `
-                            <td class="py-2 px-2 text-center border-r border-slate-200 ${inClass}">${record.in}</td>
-                            <td class="py-2 px-2 text-center border-r border-slate-200 ${outClass}">${record.out}</td>
+                            <td class="py-2 px-2 text-center border-r border-slate-200 ${inClass}">${inVal}</td>
+                            <td class="py-2 px-2 text-center border-r border-slate-200 ${outClass}">${outVal}</td>
                         `;
                     }
                 });
