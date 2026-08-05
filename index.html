@@ -10,7 +10,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* Sticky Column Khusus Tampilan Desktop/PC agar tidak bertabrakan di HP */
         @media (min-width: 768px) {
             .sticky-col-1 { position: sticky; left: 0; z-index: 20; }
             .sticky-col-2 { position: sticky; left: 48px; z-index: 20; }
@@ -116,7 +115,7 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVkmA3Ab_PELF36gNbF6OzS5jg7K8hvhtlD1PPQVseJey_2CXmERLHfrKGMHKusVou5g/exec";
 
-   const masterSiswa = [
+        const masterSiswa = [
             { no: 1, nama: "Aqil", sekolah: "Smk 11" },
             { no: 2, nama: "Rafik", sekolah: "Smk 11" },
             { no: 3, nama: "Fahrizal", sekolah: "Smk 11" },
@@ -215,9 +214,13 @@
             }
         }
 
+        // PERBAIKAN FORMAT TANGGAL DI SINI (DITAMBAHKAN padStart AGAR ADA ANGKA NOL)
         function getTglHariIniFormat() {
             const now = new Date();
-            return `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+            const tgl = String(now.getDate()).padStart(2, '0');
+            const bln = String(now.getMonth() + 1).padStart(2, '0');
+            const thn = now.getFullYear();
+            return `${tgl}/${bln}/${thn}`;
         }
 
         async function muatDataOnline() {
@@ -229,14 +232,24 @@
                 databaseAbsensi = {};
                 data.forEach(row => {
                     const [no, nama, sekolah, tanggal, jam, status] = row;
-                    if (!databaseAbsensi[no]) databaseAbsensi[no] = {};
-                    if (!databaseAbsensi[no][tanggal]) databaseAbsensi[no][tanggal] = { in: '-', out: '-' };
+                    
+                    // NORMALISASI TANGGAL: Mengubah format '5/8/2026' atau '05/8/2026' menjadi '05/08/2026'
+                    let tglFormatted = tanggal;
+                    if (tanggal && typeof tanggal === 'string' && tanggal.includes('/')) {
+                        const parts = tanggal.split('/');
+                        if (parts.length === 3) {
+                            tglFormatted = `${parts[0].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[2]}`;
+                        }
+                    }
 
-                    if (status === 'IN') databaseAbsensi[no][tanggal].in = jam;
-                    else if (status === 'OUT') databaseAbsensi[no][tanggal].out = jam;
+                    if (!databaseAbsensi[no]) databaseAbsensi[no] = {};
+                    if (!databaseAbsensi[no][tglFormatted]) databaseAbsensi[no][tglFormatted] = { in: '-', out: '-' };
+
+                    if (status === 'IN') databaseAbsensi[no][tglFormatted].in = jam;
+                    else if (status === 'OUT') databaseAbsensi[no][tglFormatted].out = jam;
                     else {
-                        databaseAbsensi[no][tanggal].in = status;
-                        databaseAbsensi[no][tanggal].out = status;
+                        databaseAbsensi[no][tglFormatted].in = status;
+                        databaseAbsensi[no][tglFormatted].out = status;
                     }
                 });
 
