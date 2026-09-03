@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Absensi PKL Agustus 2026</title>
+    <title>Rekap Absensi PKL Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -210,7 +210,7 @@
                 const response = await fetch(GOOGLE_SCRIPT_URL);
                 rawDataOnline = await response.json();
                 
-                // Kumpulkan semua tanggal yang ADA di data Google Sheets secara otomatis
+                // Kumpulkan semua tanggal yang ADA di data Google Sheets
                 const tglSet = new Set();
                 rawDataOnline.forEach(row => {
                     const tglClean = extractDateString(row[3]);
@@ -226,7 +226,14 @@
                     tglSet.add(`${dd}/${mm}/${yyyy}`);
                 }
 
-                daftarTanggal = Array.from(tglSet).sort();
+                // URUTKAN TANGGAL SECARA KRONOLOGIS (DD/MM/YYYY -> Date Object)
+                daftarTanggal = Array.from(tglSet).sort((a, b) => {
+                    const partsA = a.split('/');
+                    const partsB = b.split('/');
+                    const dateA = new Date(partsA[2], partsA[1] - 1, partsA[0]);
+                    const dateB = new Date(partsB[2], partsB[1] - 1, partsB[0]);
+                    return dateA - dateB;
+                });
 
                 buildTableHeader();
                 renderTabel();
